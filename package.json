@@ -1,0 +1,78 @@
+{
+  "name": "react-local-form",
+  "version": "0.0.1",
+  "description": "Simple React local form management",
+  "main": "dist/react-local-form.min.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/goncy/react-local-form.git"
+  },
+  "homepage": "https://github.com/goncy/react-local-form",
+  "scripts": {
+    "build": "NODE_ENV=production PACKAGE_NAME=react-local-form rollup --config rollup.config.js",
+    "test": "NODE_ENV=test jest",
+    "cover": "NODE_ENV=test npm test -- --coverage",
+    "prepublish-patch": "npm run build",
+    "publish-patch": "git commit -am 'bump version' && git push origin master && git push --tags && npm version patch && npm publish"
+  },
+  "engines": {
+    "node": ">=4.2.4"
+  },
+  "keywords": [
+    "form",
+    "local",
+    "react",
+    "context"
+  ],
+  "author": "goncy",
+  "license": "MIT",
+  "dependencies": {
+    "react": "^16.4.0",
+    "react-dom": "^16.4.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "@babel/preset-react": "^7.0.0",
+    "babel-core": "^7.0.0-bridge.0",
+    "babel-eslint": "^8.0.3",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-flow-strip-types": "^6.22.0",
+    "change-case": "^3.0.2",
+    "coveralls": "^3.0.2",
+    "enzyme": "^3.3.0",
+    "enzyme-adapter-react-16": "^1.1.1",
+    "eslint": "^4.13.1",
+    "eslint-config-prettier": "^2.9.0",
+    "eslint-config-standard": "^11.0.0-beta.0",
+    "eslint-plugin-flowtype": "^2.40.1",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-node": "^5.2.1",
+    "eslint-plugin-prettier": "^2.3.1",
+    "eslint-plugin-promise": "^3.6.0",
+    "eslint-plugin-standard": "^3.0.1",
+    "jest": "^23.5.0",
+    "prettier": "^1.9.2",
+    "react-test-renderer": "^16.4.0",
+    "redux": "^4.0.0",
+    "redux-mock-store": "^1.5.3",
+    "rollup": "^0.65.0",
+    "rollup-plugin-babel": "^4.0.2",
+    "rollup-plugin-commonjs": "^9.1.6",
+    "rollup-plugin-node-resolve": "^3.3.0",
+    "rollup-plugin-uglify": "^5.0.2"
+  },
+  "resolutions": {
+    "babel-core": "7.0.0-bridge.0"
+  },
+  "jest": {
+    "browser": true,
+    "verbose": true,
+    "collectCoverage": true,
+    "notify": true,
+    "setupTestFrameworkScriptFile": "<rootDir>/test-setup.js",
+    "testPathIgnorePatterns": [
+      "/node_modules/"
+    ]
+  }
+}
