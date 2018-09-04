@@ -13,7 +13,7 @@
     "test": "NODE_ENV=test jest",
     "cover": "NODE_ENV=test npm test -- --coverage",
     "prepublish-patch": "npm run build",
-    "publish-patch": "git commit -am 'bump version' && git push origin master && git push --tags && npm version patch && npm publish"
+    "publish-patch": "git commit -am 'bump version' && npm version patch && git push origin master && git push --tags && npm publish"
   },
   "engines": {
     "node": ">=4.2.4"
