@@ -18,19 +18,17 @@ import React from "react";
 import {Form, FormItem} from "react-local-form";
 
 const App = () => {
-  render() {
-    return (
-      <Form
-        values={{first: "Gonzalo", last: "Pozzo"}} // Initial values
-        onSubmit={console.log} // Modified values on submit
-      >
-        <FormItem name="first">
-          <input type="text" />
-        </FormItem>
-        <button type="submit">Submit</button>
-      </Form>
-    );
-  }
+  return (
+    <Form
+      values={{first: "Gonzalo", last: "Pozzo"}} // Initial values
+      onSubmit={console.log} // Modified values on submit
+    >
+      <FormItem name="first">
+        <input type="text" />
+      </FormItem>
+      <button type="submit">Submit</button>
+    </Form>
+  );
 }
 
 export default App;

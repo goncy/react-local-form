@@ -7,7 +7,7 @@ const getValue = data => {
 };
 
 class Form extends Component {
-  state = this.props.values;
+  state = this.props.values || {};
 
   onSubmit = e => {
     const {onSubmit} = this.props;
