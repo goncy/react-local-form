@@ -1,6 +1,6 @@
 {
   "name": "react-local-form",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Simple React local form management",
   "main": "dist/react-local-form.min.js",
   "repository": {
