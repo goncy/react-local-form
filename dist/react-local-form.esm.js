@@ -165,6 +165,16 @@ var getValue = function getValue(data) {
   return data.target ? data.target.value : data;
 };
 
+var connect = function connect(Component$$1) {
+  return function (ownerProps) {
+    return React.createElement(Consumer, null, function (contextProps) {
+      return React.createElement(Component$$1, _extends({
+        contextProps: contextProps
+      }, ownerProps));
+    });
+  };
+};
+
 var Form =
 /*#__PURE__*/
 function (_Component) {
@@ -219,34 +229,97 @@ function (_Component) {
   return Form;
 }(Component);
 
-var FormItem = function FormItem(_ref) {
-  var name = _ref.name,
-      children = _ref.children,
-      _ref$rules = _ref.rules,
-      rules = _ref$rules === void 0 ? [] : _ref$rules;
-  return React.createElement(Consumer, null, function (_ref2) {
-    var values = _ref2.values,
-        setContext = _ref2.setContext,
-        errors = _ref2.errors;
-    return React.cloneElement(children, {
-      value: values[name],
-      error: (errors[name] || [])[0],
-      onChange: function onChange(e) {
-        var value = getValue(e);
-        setContext(function (_ref3) {
-          var values = _ref3.values,
-              errors = _ref3.errors;
-          return {
-            values: _objectSpread({}, values, _defineProperty({}, name, value)),
-            errors: _objectSpread({}, errors, _defineProperty({}, name, rules.map(function (rule) {
-              return rule(value);
-            }).filter(Boolean)))
-          };
-        });
-        e.persist();
+var FormItem =
+/*#__PURE__*/
+function (_Component2) {
+  _inherits(FormItem, _Component2);
+
+  function FormItem() {
+    var _getPrototypeOf3;
+
+    var _temp2, _this2;
+
+    _classCallCheck(this, FormItem);
+
+    for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+      args[_key2] = arguments[_key2];
+    }
+
+    return _possibleConstructorReturn(_this2, (_temp2 = _this2 = _possibleConstructorReturn(this, (_getPrototypeOf3 = _getPrototypeOf(FormItem)).call.apply(_getPrototypeOf3, [this].concat(args))), _this2.validate = function (value) {
+      var _this2$props = _this2.props,
+          setContext = _this2$props.contextProps.setContext,
+          rules = _this2$props.rules,
+          name = _this2$props.name;
+      setContext(function (_ref) {
+        var errors = _ref.errors;
+        return {
+          errors: _objectSpread({}, errors, _defineProperty({}, name, rules.map(function (rule) {
+            return rule(value);
+          }).filter(Boolean)))
+        };
+      });
+    }, _this2.update = function (value) {
+      var _this2$props2 = _this2.props,
+          setContext = _this2$props2.contextProps.setContext,
+          name = _this2$props2.name;
+      setContext(function (_ref2) {
+        var values = _ref2.values;
+        return {
+          values: _objectSpread({}, values, _defineProperty({}, name, value))
+        };
+      });
+    }, _temp2));
+  }
+
+  _createClass(FormItem, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      var _this$props2 = this.props,
+          values = _this$props2.contextProps.values,
+          validate = _this$props2.validate,
+          name = _this$props2.name;
+
+      if (validate === "always") {
+        this.validate(values[name]);
       }
-    });
-  });
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var _this3 = this;
+
+      var _this$props3 = this.props,
+          _this$props3$contextP = _this$props3.contextProps,
+          values = _this$props3$contextP.values,
+          errors = _this$props3$contextP.errors,
+          name = _this$props3.name,
+          children = _this$props3.children;
+      return React.cloneElement(children, {
+        value: values[name],
+        error: (errors[name] || [])[0],
+        onChange: function onChange(e) {
+          var value = getValue(e);
+
+          _this3.validate(value);
+
+          _this3.update(value);
+
+          e.persist();
+        }
+      });
+    }
+  }]);
+
+  return FormItem;
+}(Component);
+
+FormItem.defaultProps = {
+  rules: [],
+  validate: "change"
+};
+var form = {
+  Form: Form,
+  FormItem: connect(FormItem)
 };
 
-export { Form, FormItem };
+export default form;

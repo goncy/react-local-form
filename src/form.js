@@ -6,10 +6,16 @@ const getValue = data => {
   return data.target ? data.target.value : data;
 };
 
+const connect = Component => ownerProps => (
+  <Consumer>
+    {contextProps => <Component contextProps={contextProps} {...ownerProps} />}
+  </Consumer>
+);
+
 class Form extends Component {
   state = {
     values: this.props.values || {},
-    errors: this.props.errors || {}
+    errors: this.props.errors || {},
   };
 
   onSubmit = e => {
@@ -23,12 +29,10 @@ class Form extends Component {
 
   render() {
     const {children, ...props} = this.props;
-    const {values, errors} = this.state
+    const {values, errors} = this.state;
 
     return (
-      <Provider
-        value={{values, errors, setContext: this.setState.bind(this)}}
-      >
+      <Provider value={{values, errors, setContext: this.setState.bind(this)}}>
         <form {...props} onSubmit={this.onSubmit}>
           {children}
         </form>
@@ -37,33 +41,76 @@ class Form extends Component {
   }
 }
 
-const FormItem = ({name, children, rules = []}) => {
-  return (
-    <Consumer>
-      {({values, setContext, errors}) =>
-        React.cloneElement(children, {
-          value: values[name],
-          error: (errors[name] || [])[0],
-          onChange: e => {
-            const value = getValue(e);
+class FormItem extends Component {
+  static defaultProps = {
+    rules: [],
+    validate: "change",
+  };
 
-            setContext(({values, errors}) => ({
-              values: {
-                ...values,
-                [name]: value
-              },
-              errors: {
-                ...errors,
-                [name]: rules.map(rule => rule(value)).filter(Boolean)
-              }
-            }))
+  componentDidMount() {
+    const {
+      contextProps: {values},
+      validate,
+      name,
+    } = this.props;
 
-            e.persist();
-          },
-        })
-      }
-    </Consumer>
-  );
+    if (validate === "always") {
+      this.validate(values[name]);
+    }
+  }
+
+  validate = value => {
+    const {
+      contextProps: {setContext},
+      rules,
+      name,
+    } = this.props;
+
+    setContext(({errors}) => ({
+      errors: {
+        ...errors,
+        [name]: rules.map(rule => rule(value)).filter(Boolean),
+      },
+    }));
+  };
+
+  update = value => {
+    const {
+      contextProps: {setContext},
+      name,
+    } = this.props;
+
+    setContext(({values}) => ({
+      values: {
+        ...values,
+        [name]: value,
+      },
+    }));
+  };
+
+  render() {
+    const {
+      contextProps: {values, errors},
+      name,
+      children,
+    } = this.props;
+
+    return React.cloneElement(children, {
+      value: values[name],
+      error: (errors[name] || [])[0],
+      onChange: e => {
+        const value = getValue(e);
+
+        this.validate(value);
+        this.update(value);
+
+        e.persist();
+      },
+    });
+  }
+}
+
+export default {
+  Form,
+  FormItem: connect(FormItem),
 };
-
-export {Form, FormItem};

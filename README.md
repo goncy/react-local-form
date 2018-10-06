@@ -23,8 +23,8 @@ const App = () => {
       values={{first: "Gonzalo", last: "Pozzo"}} // Initial values
       onSubmit={console.log} // Modified values on submit
     >
-      <FormItem name="first">
-        <input type="text" />
+      <FormItem name="first" rules={[value => !value && "This field can't be empty"]}>
+        <input type="text" /> {/* An error, value and onChange prop will be passed to this component */}
       </FormItem>
       <button type="submit">Submit</button>
     </Form>
