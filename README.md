@@ -21,10 +21,19 @@ const App = () => {
   return (
     <Form
       values={{first: "Gonzalo", last: "Pozzo"}} // Initial values
+      rules={[values => values.last !== "Pozzo" && "Your last name should be Pozzo"]} // Array of rules that should pass so the form can submit
       onSubmit={console.log} // Modified values on submit
+      onError={console.log} // Called instead of onSubmit if errors were found on the form items or the form
     >
-      <FormItem name="first" rules={[value => !value && "This field can't be empty"]}>
+      <FormItem
+        name="first" // Name of the field to map
+        rules={[value => !value && "This field can't be empty"]} // Array of rules that should pass so the form can submit
+        validate="always" // Value will be validated since mount
+      >
         <input type="text" /> {/* An error, value and onChange prop will be passed to this component */}
+      </FormItem>
+      <FormItem name="last">
+        <input type="text" />
       </FormItem>
       <button type="submit">Submit</button>
     </Form>
