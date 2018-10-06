@@ -170,6 +170,12 @@ var getValue = function getValue(data) {
   return data.target ? data.target.value : data;
 };
 
+var mapRules = function mapRules(rules, value) {
+  return rules.map(function (rule) {
+    return rule(value);
+  }).filter(Boolean);
+};
+
 var connect = function connect(Component) {
   return function (ownerProps) {
     return React__default.createElement(Consumer, null, function (contextProps) {
@@ -198,41 +204,74 @@ function (_Component) {
 
     return _possibleConstructorReturn(_this, (_temp = _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Form)).call.apply(_getPrototypeOf2, [this].concat(args))), _this.state = {
       values: _this.props.values || {},
-      errors: _this.props.errors || {}
+      formErrors: [],
+      fieldErrors: {}
     }, _this.onSubmit = function (e) {
-      var onSubmit = _this.props.onSubmit;
+      var _this$props = _this.props,
+          onSubmit = _this$props.onSubmit,
+          onError = _this$props.onError,
+          rules = _this$props.rules;
       var _this$state = _this.state,
-          errors = _this$state.errors,
+          fieldErrors = _this$state.fieldErrors,
           values = _this$state.values;
       e.preventDefault();
-      Object.values(errors).flat().length === 0 && onSubmit(values);
+
+      var _fieldErrors = Object.values(fieldErrors).flat();
+
+      var _formErrors = mapRules(rules, values).flat();
+
+      var errors = [_fieldErrors, _formErrors].flat();
+
+      _this.setState({
+        formErrors: _formErrors
+      });
+
+      errors.length === 0 ? onSubmit(values) : onError(errors);
     }, _temp));
   }
 
   _createClass(Form, [{
     key: "render",
     value: function render() {
-      var _this$props = this.props,
-          children = _this$props.children,
-          props = _objectWithoutProperties(_this$props, ["children"]);
+      var _this$props2 = this.props,
+          children = _this$props2.children,
+          render = _this$props2.render,
+          props = _objectWithoutProperties(_this$props2, ["children", "render"]);
 
       var _this$state2 = this.state,
           values = _this$state2.values,
-          errors = _this$state2.errors;
+          fieldErrors = _this$state2.fieldErrors,
+          formErrors = _this$state2.formErrors;
       return React__default.createElement(Provider, {
         value: {
           values: values,
-          errors: errors,
+          fieldErrors: fieldErrors,
           setContext: this.setState.bind(this)
         }
       }, React__default.createElement("form", _extends({}, props, {
         onSubmit: this.onSubmit
-      }), children));
+      }), render ? render({
+        values: values,
+        errors: {
+          fields: fieldErrors,
+          form: formErrors
+        }
+      }) : children));
     }
   }]);
 
   return Form;
 }(React.Component);
+
+Form.defaultProps = {
+  rules: [],
+  onError: function onError(_) {
+    return _;
+  },
+  onSubmit: function onSubmit(_) {
+    return _;
+  }
+};
 
 var FormItem =
 /*#__PURE__*/
@@ -256,11 +295,9 @@ function (_Component2) {
           rules = _this2$props.rules,
           name = _this2$props.name;
       setContext(function (_ref) {
-        var errors = _ref.errors;
+        var fieldErrors = _ref.fieldErrors;
         return {
-          errors: _objectSpread({}, errors, _defineProperty({}, name, rules.map(function (rule) {
-            return rule(value);
-          }).filter(Boolean)))
+          fieldErrors: _objectSpread({}, fieldErrors, _defineProperty({}, name, mapRules(rules, value)))
         };
       });
     }, _this2.update = function (value) {
@@ -279,10 +316,10 @@ function (_Component2) {
   _createClass(FormItem, [{
     key: "componentDidMount",
     value: function componentDidMount() {
-      var _this$props2 = this.props,
-          values = _this$props2.contextProps.values,
-          validate = _this$props2.validate,
-          name = _this$props2.name;
+      var _this$props3 = this.props,
+          values = _this$props3.contextProps.values,
+          validate = _this$props3.validate,
+          name = _this$props3.name;
 
       if (validate === "always") {
         this.validate(values[name]);
@@ -293,15 +330,15 @@ function (_Component2) {
     value: function render() {
       var _this3 = this;
 
-      var _this$props3 = this.props,
-          _this$props3$contextP = _this$props3.contextProps,
-          values = _this$props3$contextP.values,
-          errors = _this$props3$contextP.errors,
-          name = _this$props3.name,
-          children = _this$props3.children;
+      var _this$props4 = this.props,
+          _this$props4$contextP = _this$props4.contextProps,
+          values = _this$props4$contextP.values,
+          fieldErrors = _this$props4$contextP.fieldErrors,
+          name = _this$props4.name,
+          children = _this$props4.children;
       return React__default.cloneElement(children, {
         value: values[name],
-        error: (errors[name] || [])[0],
+        error: (fieldErrors[name] || [])[0],
         onChange: function onChange(e) {
           var value = getValue(e);
 
