@@ -18,8 +18,6 @@ const connect = Component => ownerProps => (
 class Form extends Component {
   static defaultProps = {
     rules: [],
-    onError: _ => _,
-    onSubmit: _ => _,
   };
 
   state = {
@@ -40,7 +38,9 @@ class Form extends Component {
 
     this.setState({formErrors: _formErrors});
 
-    errors.length === 0 ? onSubmit(values) : onError(errors);
+    errors.length === 0
+      ? onSubmit && onSubmit(values)
+      : onError && onError(errors);
   };
 
   render() {
