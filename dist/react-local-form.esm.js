@@ -55,6 +55,25 @@ function _extends() {
   return _extends.apply(this, arguments);
 }
 
+function _objectSpread(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+    var ownKeys = Object.keys(source);
+
+    if (typeof Object.getOwnPropertySymbols === 'function') {
+      ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) {
+        return Object.getOwnPropertyDescriptor(source, sym).enumerable;
+      }));
+    }
+
+    ownKeys.forEach(function (key) {
+      _defineProperty(target, key, source[key]);
+    });
+  }
+
+  return target;
+}
+
 function _inherits(subClass, superClass) {
   if (typeof superClass !== "function" && superClass !== null) {
     throw new TypeError("Super expression must either be null or a function");
@@ -162,10 +181,16 @@ function (_Component) {
       args[_key] = arguments[_key];
     }
 
-    return _possibleConstructorReturn(_this, (_temp = _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Form)).call.apply(_getPrototypeOf2, [this].concat(args))), _this.state = _this.props.values, _this.onSubmit = function (e) {
+    return _possibleConstructorReturn(_this, (_temp = _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Form)).call.apply(_getPrototypeOf2, [this].concat(args))), _this.state = {
+      values: _this.props.values || {},
+      errors: _this.props.errors || {}
+    }, _this.onSubmit = function (e) {
       var onSubmit = _this.props.onSubmit;
+      var _this$state = _this.state,
+          errors = _this$state.errors,
+          values = _this$state.values;
       e.preventDefault();
-      onSubmit(_this.state);
+      Object.values(errors).flat().length === 0 && onSubmit(values);
     }, _temp));
   }
 
@@ -176,10 +201,14 @@ function (_Component) {
           children = _this$props.children,
           props = _objectWithoutProperties(_this$props, ["children"]);
 
+      var _this$state2 = this.state,
+          values = _this$state2.values,
+          errors = _this$state2.errors;
       return React.createElement(Provider, {
         value: {
-          values: this.state,
-          setFields: this.setState.bind(this)
+          values: values,
+          errors: errors,
+          setContext: this.setState.bind(this)
         }
       }, React.createElement("form", _extends({}, props, {
         onSubmit: this.onSubmit
@@ -192,14 +221,29 @@ function (_Component) {
 
 var FormItem = function FormItem(_ref) {
   var name = _ref.name,
-      children = _ref.children;
+      children = _ref.children,
+      _ref$rules = _ref.rules,
+      rules = _ref$rules === void 0 ? [] : _ref$rules;
   return React.createElement(Consumer, null, function (_ref2) {
     var values = _ref2.values,
-        setFields = _ref2.setFields;
+        setContext = _ref2.setContext,
+        errors = _ref2.errors;
     return React.cloneElement(children, {
       value: values[name],
+      error: (errors[name] || [])[0],
       onChange: function onChange(e) {
-        return setFields(_defineProperty({}, name, getValue(e)));
+        var value = getValue(e);
+        setContext(function (_ref3) {
+          var values = _ref3.values,
+              errors = _ref3.errors;
+          return {
+            values: _objectSpread({}, values, _defineProperty({}, name, value)),
+            errors: _objectSpread({}, errors, _defineProperty({}, name, rules.map(function (rule) {
+              return rule(value);
+            }).filter(Boolean)))
+          };
+        });
+        e.persist();
       }
     });
   });
