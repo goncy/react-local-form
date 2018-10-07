@@ -157,6 +157,44 @@ function _possibleConstructorReturn(self, call) {
   return _assertThisInitialized(self);
 }
 
+function _slicedToArray(arr, i) {
+  return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest();
+}
+
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+
+function _iterableToArrayLimit(arr, i) {
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
+
+  try {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+
+  return _arr;
+}
+
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance");
+}
+
 var _React$createContext = React.createContext({}),
     Provider = _React$createContext.Provider,
     Consumer = _React$createContext.Consumer;
@@ -169,6 +207,22 @@ var mapRules = function mapRules(rules, value) {
   return rules.map(function (rule) {
     return rule(value);
   }).filter(Boolean);
+};
+
+var fieldErrorsToArray = function fieldErrorsToArray(obj) {
+  return Object.entries(obj).map(function (_ref) {
+    var _ref2 = _slicedToArray(_ref, 2),
+        key = _ref2[0],
+        value = _ref2[1];
+
+    return {
+      field: key,
+      errors: value
+    };
+  }).filter(function (_ref3) {
+    var errors = _ref3.errors;
+    return Boolean(errors.length);
+  });
 };
 
 var connect = function connect(Component$$1) {
@@ -204,24 +258,23 @@ function (_Component) {
     }, _this.onSubmit = function (e) {
       var _this$props = _this.props,
           onSubmit = _this$props.onSubmit,
-          onError = _this$props.onError,
           rules = _this$props.rules;
       var _this$state = _this.state,
-          fieldErrors = _this$state.fieldErrors,
+          _fieldErrors = _this$state.fieldErrors,
           values = _this$state.values;
       e.preventDefault();
-
-      var _fieldErrors = Object.values(fieldErrors).flat();
-
-      var _formErrors = mapRules(rules, values).flat();
-
-      var errors = [_fieldErrors, _formErrors].flat();
+      var fieldErrors = fieldErrorsToArray(_fieldErrors);
+      var formErrors = mapRules(rules, values).flat();
 
       _this.setState({
-        formErrors: _formErrors
+        formErrors: formErrors
       });
 
-      errors.length === 0 ? onSubmit(values) : onError(errors);
+      onSubmit({
+        values: values,
+        fieldErrors: fieldErrors,
+        formErrors: formErrors
+      });
     }, _temp));
   }
 
@@ -247,10 +300,8 @@ function (_Component) {
         onSubmit: this.onSubmit
       }), render ? render({
         values: values,
-        errors: {
-          fields: fieldErrors,
-          form: formErrors
-        }
+        formErrors: formErrors,
+        fieldErrors: fieldErrorsToArray(fieldErrors)
       }) : children));
     }
   }]);
@@ -259,13 +310,7 @@ function (_Component) {
 }(Component);
 
 Form.defaultProps = {
-  rules: [],
-  onError: function onError(_) {
-    return _;
-  },
-  onSubmit: function onSubmit(_) {
-    return _;
-  }
+  rules: []
 };
 
 var FormItem =
@@ -289,8 +334,8 @@ function (_Component2) {
           setContext = _this2$props.contextProps.setContext,
           rules = _this2$props.rules,
           name = _this2$props.name;
-      setContext(function (_ref) {
-        var fieldErrors = _ref.fieldErrors;
+      setContext(function (_ref4) {
+        var fieldErrors = _ref4.fieldErrors;
         return {
           fieldErrors: _objectSpread({}, fieldErrors, _defineProperty({}, name, mapRules(rules, value)))
         };
@@ -299,8 +344,8 @@ function (_Component2) {
       var _this2$props2 = _this2.props,
           setContext = _this2$props2.contextProps.setContext,
           name = _this2$props2.name;
-      setContext(function (_ref2) {
-        var values = _ref2.values;
+      setContext(function (_ref5) {
+        var values = _ref5.values;
         return {
           values: _objectSpread({}, values, _defineProperty({}, name, value))
         };

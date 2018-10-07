@@ -9,6 +9,14 @@ const getValue = data => {
 const mapRules = (rules, value) =>
   rules.map(rule => rule(value)).filter(Boolean);
 
+const fieldErrorsToArray = obj =>
+  Object.entries(obj)
+    .map(([key, value]) => ({
+      field: key,
+      errors: value,
+    }))
+    .filter(({errors}) => Boolean(errors.length));
+
 const connect = Component => ownerProps => (
   <Consumer>
     {contextProps => <Component contextProps={contextProps} {...ownerProps} />}
@@ -27,20 +35,17 @@ class Form extends Component {
   };
 
   onSubmit = e => {
-    const {onSubmit, onError, rules} = this.props;
-    const {fieldErrors, values} = this.state;
+    const {onSubmit, rules} = this.props;
+    const {fieldErrors: _fieldErrors, values} = this.state;
 
     e.preventDefault();
 
-    const _fieldErrors = Object.values(fieldErrors).flat();
-    const _formErrors = mapRules(rules, values).flat();
-    const errors = [_fieldErrors, _formErrors].flat();
+    const fieldErrors = fieldErrorsToArray(_fieldErrors);
+    const formErrors = mapRules(rules, values).flat();
 
-    this.setState({formErrors: _formErrors});
+    this.setState({formErrors});
 
-    errors.length === 0
-      ? onSubmit && onSubmit(values)
-      : onError && onError(errors);
+    onSubmit({values, fieldErrors, formErrors});
   };
 
   render() {
@@ -55,10 +60,8 @@ class Form extends Component {
           {render
             ? render({
                 values,
-                errors: {
-                  fields: fieldErrors,
-                  form: formErrors,
-                },
+                formErrors,
+                fieldErrors: fieldErrorsToArray(fieldErrors),
               })
             : children}
         </form>
