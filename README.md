@@ -20,23 +20,32 @@ import {Form, FormItem} from "react-local-form";
 const App = () => {
   return (
     <Form
-      values={{first: "Gonzalo", last: "Pozzo"}} // Initial values
-      rules={[values => values.last !== "Pozzo" && "Your last name should be Pozzo"]} // Array of rules that should pass so the form can submit
-      onSubmit={console.log} // Modified values on submit
-      onError={console.log} // Called instead of onSubmit if errors were found on the form items or the form
-    >
-      <FormItem
-        name="first" // Name of the field to map
-        rules={[value => !value && "This field can't be empty"]} // Array of rules that should pass so the form can submit
-        validate="always" // Value will be validated since mount
-      >
-        <input type="text" /> {/* An error, value and onChange prop will be passed to this component */}
-      </FormItem>
-      <FormItem name="last">
-        <input type="text" />
-      </FormItem>
-      <button type="submit">Submit</button>
-    </Form>
+      // Initial values
+      values={{first: "Gonzalo", last: "Pozzo"}}
+      // Array of rules that should pass so the form can submit
+      rules={[values => values.last !== "Pozzo" && "Your last name should be Pozzo"]}
+      // Log the results when there aren't form errors
+      onSubmit={({values, formErrors: [error]}) =>
+        error ? toaster.danger(error) : console.log(values)
+      }
+      // You also can pass children instead of render if you don't need the errors
+      render={({fieldErrors}) => (
+        <FormItem
+          // Name of the field to map
+          name="first"
+          // Array of rules that should pass so the form can submit
+          rules={[value => !value && "This field can't be empty"]}
+          // Value will be validated since mount
+          validate="always"
+        >
+          <input type="text" /> {/* An error, value and onChange prop will automatically be passed to this component */}
+        </FormItem>
+        <FormItem name="last">
+          <input type="text" />
+        </FormItem>
+        <button type="submit" disabled={Boolean(fieldErrors.length)}>Submit</button>
+      )}
+    />
   );
 }
 
