@@ -22,14 +22,12 @@ const App = () => {
     <Form
       // Initial values
       values={{first: "Gonzalo", last: "Pozzo"}}
-      // Array of rules that should pass so the form can submit
-      rules={[values => values.last !== "Pozzo" && "Your last name should be Pozzo"]}
       // Log the results when there aren't form errors
-      onSubmit={({values, formErrors: [error]}) =>
+      onSubmit={({values, errors: [error]}) =>
         error ? toaster.danger(error) : console.log(values)
       }
       // You also can pass children instead of render if you don't need the errors
-      render={({fieldErrors}) => (
+      render={({errors}) => (
         <FormItem
           // Name of the field to map
           name="first"
@@ -43,7 +41,7 @@ const App = () => {
         <FormItem name="last">
           <input type="text" />
         </FormItem>
-        <button type="submit" disabled={Boolean(fieldErrors.length)}>Submit</button>
+        <button type="submit" disabled={Boolean(errors.length)}>Submit</button>
       )}
     />
   );
