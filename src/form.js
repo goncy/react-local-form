@@ -9,7 +9,7 @@ const getValue = data => {
 const mapRules = (rules, value) =>
   rules.map(rule => rule(value)).filter(Boolean);
 
-const fieldErrorsToArray = obj =>
+const mapErrors = obj =>
   Object.entries(obj)
     .map(([key, value]) => ({
       field: key,
@@ -24,44 +24,31 @@ const connect = Component => ownerProps => (
 );
 
 class Form extends Component {
-  static defaultProps = {
-    rules: [],
-  };
-
   state = {
     values: this.props.values || {},
-    formErrors: [],
-    fieldErrors: {},
+    errors: {},
   };
 
   onSubmit = e => {
-    const {onSubmit, rules} = this.props;
-    const {fieldErrors: _fieldErrors, values} = this.state;
+    const {onSubmit} = this.props;
+    const {errors, values} = this.state;
 
     e.preventDefault();
 
-    const fieldErrors = fieldErrorsToArray(_fieldErrors);
-    const formErrors = mapRules(rules, values).flat();
-
-    this.setState({formErrors});
-
-    onSubmit({values, fieldErrors, formErrors});
+    onSubmit({values, errors: mapErrors(errors)});
   };
 
   render() {
     const {children, render, ...props} = this.props;
-    const {values, fieldErrors, formErrors} = this.state;
+    const {values, errors} = this.state;
 
     return (
-      <Provider
-        value={{values, fieldErrors, setContext: this.setState.bind(this)}}
-      >
+      <Provider value={{values, errors, setContext: this.setState.bind(this)}}>
         <form {...props} onSubmit={this.onSubmit}>
           {render
             ? render({
                 values,
-                formErrors,
-                fieldErrors: fieldErrorsToArray(fieldErrors),
+                errors: mapErrors(errors),
               })
             : children}
         </form>
@@ -95,9 +82,9 @@ class FormItem extends Component {
       name,
     } = this.props;
 
-    setContext(({fieldErrors}) => ({
-      fieldErrors: {
-        ...fieldErrors,
+    setContext(({errors}) => ({
+      errors: {
+        ...errors,
         [name]: mapRules(rules, value),
       },
     }));
@@ -119,14 +106,14 @@ class FormItem extends Component {
 
   render() {
     const {
-      contextProps: {values, fieldErrors},
+      contextProps: {values, errors},
       name,
       children,
     } = this.props;
 
     return React.cloneElement(children, {
       value: values[name],
-      error: (fieldErrors[name] || [])[0],
+      error: (errors[name] || [])[0],
       onChange: e => {
         const value = getValue(e);
 
