@@ -2,13 +2,6 @@ import React, {Component} from "react";
 
 const {Provider, Consumer} = React.createContext({});
 
-const getValue = data => {
-  return data.target ? data.target.value : data;
-};
-
-const mapRules = (rules, value) =>
-  rules.map(rule => rule(value)).filter(Boolean);
-
 const mapErrors = obj =>
   Object.entries(obj)
     .map(([key, value]) => ({
@@ -71,11 +64,11 @@ class FormItem extends Component {
     } = this.props;
 
     if (validate === "always") {
-      this.validate(values[name]);
+      this.validate(values[name], values);
     }
   }
 
-  validate = value => {
+  validate = (value, values) => {
     const {
       contextProps: {setContext},
       rules,
@@ -85,7 +78,7 @@ class FormItem extends Component {
     setContext(({errors}) => ({
       errors: {
         ...errors,
-        [name]: mapRules(rules, value),
+        [name]: rules.map(rule => rule(value, values)).filter(Boolean),
       },
     }));
   };
@@ -114,11 +107,12 @@ class FormItem extends Component {
     return React.cloneElement(children, {
       value: values[name],
       error: (errors[name] || [])[0],
+      errors: errors[name] || [],
       onChange: e => {
-        const value = getValue(e);
+        const value = e.target ? e.target.value : e;
 
-        this.validate(value);
         this.update(value);
+        this.validate(value, values);
 
         e.persist();
       },

@@ -205,16 +205,6 @@
       Provider = _React$createContext.Provider,
       Consumer = _React$createContext.Consumer;
 
-  var getValue = function getValue(data) {
-    return data.target ? data.target.value : data;
-  };
-
-  var mapRules = function mapRules(rules, value) {
-    return rules.map(function (rule) {
-      return rule(value);
-    }).filter(Boolean);
-  };
-
   var mapErrors = function mapErrors(obj) {
     return Object.entries(obj).map(function (_ref) {
       var _ref2 = _slicedToArray(_ref, 2),
@@ -318,7 +308,7 @@
         args[_key2] = arguments[_key2];
       }
 
-      return _possibleConstructorReturn(_this2, (_temp2 = _this2 = _possibleConstructorReturn(this, (_getPrototypeOf3 = _getPrototypeOf(FormItem)).call.apply(_getPrototypeOf3, [this].concat(args))), _this2.validate = function (value) {
+      return _possibleConstructorReturn(_this2, (_temp2 = _this2 = _possibleConstructorReturn(this, (_getPrototypeOf3 = _getPrototypeOf(FormItem)).call.apply(_getPrototypeOf3, [this].concat(args))), _this2.validate = function (value, values) {
         var _this2$props = _this2.props,
             setContext = _this2$props.contextProps.setContext,
             rules = _this2$props.rules,
@@ -326,7 +316,9 @@
         setContext(function (_ref4) {
           var errors = _ref4.errors;
           return {
-            errors: _objectSpread({}, errors, _defineProperty({}, name, mapRules(rules, value)))
+            errors: _objectSpread({}, errors, _defineProperty({}, name, rules.map(function (rule) {
+              return rule(value, values);
+            }).filter(Boolean)))
           };
         });
       }, _this2.update = function (value) {
@@ -351,7 +343,7 @@
             name = _this$props2.name;
 
         if (validate === "always") {
-          this.validate(values[name]);
+          this.validate(values[name], values);
         }
       }
     }, {
@@ -368,12 +360,13 @@
         return React__default.cloneElement(children, {
           value: values[name],
           error: (errors[name] || [])[0],
+          errors: errors[name] || [],
           onChange: function onChange(e) {
-            var value = getValue(e);
-
-            _this3.validate(value);
+            var value = e.target ? e.target.value : e;
 
             _this3.update(value);
+
+            _this3.validate(value, values);
 
             e.persist();
           }
