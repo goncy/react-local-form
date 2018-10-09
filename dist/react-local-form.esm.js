@@ -352,7 +352,7 @@ function (_Component2) {
           name = _this$props3.name,
           children = _this$props3.children,
           validate = _this$props3.validate;
-      return React.cloneElement(children, {
+      return React.cloneElement(children, _objectSpread({
         value: values[name],
         error: (errors[name] || [])[0],
         errors: errors[name] || [],
@@ -367,7 +367,7 @@ function (_Component2) {
           validate.includes("change") && _this3.validate(value, values);
           e.persist();
         }
-      });
+      }, children.props));
     }
   }]);
 

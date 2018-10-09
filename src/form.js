@@ -119,6 +119,7 @@ class FormItem extends Component {
 
         e.persist();
       },
+      ...children.props,
     });
   }
 }
