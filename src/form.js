@@ -53,7 +53,7 @@ class Form extends Component {
 class FormItem extends Component {
   static defaultProps = {
     rules: [],
-    validate: "change",
+    validate: ["change"],
   };
 
   componentDidMount() {
@@ -63,7 +63,7 @@ class FormItem extends Component {
       name,
     } = this.props;
 
-    if (validate === "always") {
+    if (validate.includes("mount")) {
       this.validate(values[name], values);
     }
   }
@@ -102,17 +102,20 @@ class FormItem extends Component {
       contextProps: {values, errors},
       name,
       children,
+      validate,
     } = this.props;
 
     return React.cloneElement(children, {
       value: values[name],
       error: (errors[name] || [])[0],
       errors: errors[name] || [],
+      onFocus: () =>
+        validate.includes("focus") && this.validate(values[name], values),
       onChange: e => {
         const value = e.target ? e.target.value : e;
 
         this.update(value);
-        this.validate(value, values);
+        validate.includes("change") && this.validate(value, values);
 
         e.persist();
       },

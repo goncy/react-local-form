@@ -336,7 +336,7 @@ function (_Component2) {
           validate = _this$props2.validate,
           name = _this$props2.name;
 
-      if (validate === "always") {
+      if (validate.includes("mount")) {
         this.validate(values[name], values);
       }
     }
@@ -350,18 +350,21 @@ function (_Component2) {
           values = _this$props3$contextP.values,
           errors = _this$props3$contextP.errors,
           name = _this$props3.name,
-          children = _this$props3.children;
+          children = _this$props3.children,
+          validate = _this$props3.validate;
       return React.cloneElement(children, {
         value: values[name],
         error: (errors[name] || [])[0],
         errors: errors[name] || [],
+        onFocus: function onFocus() {
+          return validate.includes("focus") && _this3.validate(values[name], values);
+        },
         onChange: function onChange(e) {
           var value = e.target ? e.target.value : e;
 
           _this3.update(value);
 
-          _this3.validate(value, values);
-
+          validate.includes("change") && _this3.validate(value, values);
           e.persist();
         }
       });
@@ -373,7 +376,7 @@ function (_Component2) {
 
 FormItem.defaultProps = {
   rules: [],
-  validate: "change"
+  validate: ["change"]
 };
 var form = {
   Form: Form,
