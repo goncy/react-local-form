@@ -34,7 +34,7 @@ const App = () => {
           // Array of rules that should pass so the form can submit
           rules={[value => !value && "This field can't be empty"]}
           // Value will be validated since mount
-          validate="always"
+          validate={["mount", "focus", "change"]}
         >
           <input type="text" /> {/* An error, value and onChange prop will automatically be passed to this component */}
         </FormItem>
