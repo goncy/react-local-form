@@ -31,6 +31,9 @@ class Form extends Component {
     onSubmit({values, errors: mapErrors(errors)});
   };
 
+  setValues = newValues =>
+    this.setState(({values}) => ({values: {...values, ...newValues}}));
+
   render() {
     const {children, render, ...props} = this.props;
     const {values, errors} = this.state;
@@ -42,6 +45,7 @@ class Form extends Component {
             ? render({
                 values,
                 errors: mapErrors(errors),
+                setValues: this.setValues,
               })
             : children}
         </form>

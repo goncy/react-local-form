@@ -260,6 +260,13 @@
           values: values,
           errors: mapErrors(errors)
         });
+      }, _this.setValues = function (newValues) {
+        return _this.setState(function (_ref4) {
+          var values = _ref4.values;
+          return {
+            values: _objectSpread({}, values, newValues)
+          };
+        });
       }, _temp));
     }
 
@@ -284,7 +291,8 @@
           onSubmit: this.onSubmit
         }), render ? render({
           values: values,
-          errors: mapErrors(errors)
+          errors: mapErrors(errors),
+          setValues: this.setValues
         }) : children));
       }
     }]);
@@ -313,8 +321,8 @@
             setContext = _this2$props.contextProps.setContext,
             rules = _this2$props.rules,
             name = _this2$props.name;
-        setContext(function (_ref4) {
-          var errors = _ref4.errors;
+        setContext(function (_ref5) {
+          var errors = _ref5.errors;
           return {
             errors: _objectSpread({}, errors, _defineProperty({}, name, rules.map(function (rule) {
               return rule(value, values);
@@ -325,8 +333,8 @@
         var _this2$props2 = _this2.props,
             setContext = _this2$props2.contextProps.setContext,
             name = _this2$props2.name;
-        setContext(function (_ref5) {
-          var values = _ref5.values;
+        setContext(function (_ref6) {
+          var values = _ref6.values;
           return {
             values: _objectSpread({}, values, _defineProperty({}, name, value))
           };
