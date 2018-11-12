@@ -204,22 +204,6 @@ var _React$createContext = React__default.createContext({}),
     Provider = _React$createContext.Provider,
     Consumer = _React$createContext.Consumer;
 
-var mapErrors = function mapErrors(obj) {
-  return Object.entries(obj).map(function (_ref) {
-    var _ref2 = _slicedToArray(_ref, 2),
-        key = _ref2[0],
-        value = _ref2[1];
-
-    return {
-      field: key,
-      errors: value
-    };
-  }).filter(function (_ref3) {
-    var errors = _ref3.errors;
-    return Boolean(errors.length);
-  });
-};
-
 var connect = function connect(Component) {
   return function (ownerProps) {
     return React__default.createElement(Consumer, null, function (contextProps) {
@@ -247,9 +231,9 @@ function (_Component) {
     }
 
     return _possibleConstructorReturn(_this, (_temp = _this = _possibleConstructorReturn(this, (_getPrototypeOf2 = _getPrototypeOf(Form)).call.apply(_getPrototypeOf2, [this].concat(args))), _this.state = {
-      values: _this.props.values || {},
+      values: {},
       errors: {}
-    }, _this.onSubmit = function (e) {
+    }, _this.handleSubmit = function (e) {
       var onSubmit = _this.props.onSubmit;
       var _this$state = _this.state,
           errors = _this$state.errors,
@@ -257,19 +241,42 @@ function (_Component) {
       e.preventDefault();
       onSubmit({
         values: values,
-        errors: mapErrors(errors)
+        errors: errors
       });
-    }, _this.setValues = function (newValues) {
-      return _this.setState(function (_ref4) {
-        var values = _ref4.values;
+    }, _this.handleSetValues = function () {
+      var newValues = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var rules = _this.props.rules;
+
+      _this.setState(function (_ref) {
+        var values = _ref.values,
+            errors = _ref.errors;
+
+        var mergedValues = _objectSpread({}, values, newValues);
+
+        var mergedErrors = Object.entries(rules).reduce(function (errors, _ref2) {
+          var _ref3 = _slicedToArray(_ref2, 2),
+              property = _ref3[0],
+              rules = _ref3[1];
+
+          return _objectSpread({}, errors, _defineProperty({}, property, rules.map(function (rule) {
+            return rule(mergedValues[property], mergedValues);
+          }).filter(Boolean)));
+        }, errors);
         return {
-          values: _objectSpread({}, values, newValues)
+          values: mergedValues,
+          errors: mergedErrors
         };
       });
     }, _temp));
   }
 
   _createClass(Form, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      var values = this.props.values;
+      this.handleSetValues(values);
+    }
+  }, {
     key: "render",
     value: function render() {
       var _this$props = this.props,
@@ -284,14 +291,14 @@ function (_Component) {
         value: {
           values: values,
           errors: errors,
-          setContext: this.setState.bind(this)
+          setValues: this.handleSetValues
         }
       }, React__default.createElement("form", _extends({}, props, {
-        onSubmit: this.onSubmit
+        onSubmit: this.handleSubmit
       }), render ? render({
         values: values,
-        errors: mapErrors(errors),
-        setValues: this.setValues
+        errors: errors,
+        setValues: this.handleSetValues
       }) : children));
     }
   }]);
@@ -299,98 +306,29 @@ function (_Component) {
   return Form;
 }(React.Component);
 
-var FormItem =
-/*#__PURE__*/
-function (_Component2) {
-  _inherits(FormItem, _Component2);
-
-  function FormItem() {
-    var _getPrototypeOf3;
-
-    var _temp2, _this2;
-
-    _classCallCheck(this, FormItem);
-
-    for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-      args[_key2] = arguments[_key2];
-    }
-
-    return _possibleConstructorReturn(_this2, (_temp2 = _this2 = _possibleConstructorReturn(this, (_getPrototypeOf3 = _getPrototypeOf(FormItem)).call.apply(_getPrototypeOf3, [this].concat(args))), _this2.validate = function (value, values) {
-      var _this2$props = _this2.props,
-          setContext = _this2$props.contextProps.setContext,
-          rules = _this2$props.rules,
-          name = _this2$props.name;
-      setContext(function (_ref5) {
-        var errors = _ref5.errors;
-        return {
-          errors: _objectSpread({}, errors, _defineProperty({}, name, rules.map(function (rule) {
-            return rule(value, values);
-          }).filter(Boolean)))
-        };
-      });
-    }, _this2.update = function (value) {
-      var _this2$props2 = _this2.props,
-          setContext = _this2$props2.contextProps.setContext,
-          name = _this2$props2.name;
-      setContext(function (_ref6) {
-        var values = _ref6.values;
-        return {
-          values: _objectSpread({}, values, _defineProperty({}, name, value))
-        };
-      });
-    }, _temp2));
-  }
-
-  _createClass(FormItem, [{
-    key: "componentDidMount",
-    value: function componentDidMount() {
-      var _this$props2 = this.props,
-          values = _this$props2.contextProps.values,
-          validate = _this$props2.validate,
-          name = _this$props2.name;
-
-      if (validate.includes("mount")) {
-        this.validate(values[name], values);
-      }
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      var _this3 = this;
-
-      var _this$props3 = this.props,
-          _this$props3$contextP = _this$props3.contextProps,
-          values = _this$props3$contextP.values,
-          errors = _this$props3$contextP.errors,
-          name = _this$props3.name,
-          children = _this$props3.children,
-          validate = _this$props3.validate;
-      return React__default.cloneElement(children, _objectSpread({
-        value: values[name],
-        error: (errors[name] || [])[0],
-        errors: errors[name] || [],
-        onFocus: function onFocus() {
-          return validate.includes("focus") && _this3.validate(values[name], values);
-        },
-        onChange: function onChange(e) {
-          var value = e.target ? e.target.value : e;
-
-          _this3.update(value);
-
-          validate.includes("change") && _this3.validate(value, values);
-          e.persist();
-        }
-      }, children.props));
-    }
-  }]);
-
-  return FormItem;
-}(React.Component);
-
-FormItem.defaultProps = {
-  rules: [],
-  validate: ["change"]
+Form.defaultProps = {
+  values: {},
+  rules: []
 };
+
+var FormItem = function FormItem(_ref4) {
+  var _ref4$contextProps = _ref4.contextProps,
+      values = _ref4$contextProps.values,
+      errors = _ref4$contextProps.errors,
+      setValues = _ref4$contextProps.setValues,
+      name = _ref4.name,
+      children = _ref4.children;
+  return React__default.cloneElement(children, _objectSpread({
+    value: values[name],
+    error: (errors[name] || [])[0],
+    errors: errors[name] || [],
+    onChange: function onChange(e) {
+      setValues(_defineProperty({}, name, e.target ? e.target.value : e));
+      e.persist();
+    }
+  }, children.props));
+};
+
 var form = {
   Form: Form,
   FormItem: connect(FormItem)

@@ -2,14 +2,6 @@ import React, {Component} from "react";
 
 const {Provider, Consumer} = React.createContext({});
 
-const mapErrors = obj =>
-  Object.entries(obj)
-    .map(([key, value]) => ({
-      field: key,
-      errors: value,
-    }))
-    .filter(({errors}) => Boolean(errors.length));
-
 const connect = Component => ownerProps => (
   <Consumer>
     {contextProps => <Component contextProps={contextProps} {...ownerProps} />}
@@ -17,35 +9,65 @@ const connect = Component => ownerProps => (
 );
 
 class Form extends Component {
+  static defaultProps = {
+    values: {},
+    rules: [],
+  };
+
   state = {
-    values: this.props.values || {},
+    values: {},
     errors: {},
   };
 
-  onSubmit = e => {
+  componentDidMount() {
+    const {values} = this.props;
+
+    this.handleSetValues(values);
+  }
+
+  handleSubmit = e => {
     const {onSubmit} = this.props;
     const {errors, values} = this.state;
 
     e.preventDefault();
 
-    onSubmit({values, errors: mapErrors(errors)});
+    onSubmit({values, errors});
   };
 
-  setValues = newValues =>
-    this.setState(({values}) => ({values: {...values, ...newValues}}));
+  handleSetValues = (newValues = {}) => {
+    const {rules} = this.props;
+
+    this.setState(({values, errors}) => {
+      const mergedValues = {...values, ...newValues};
+      const mergedErrors = Object.entries(rules).reduce(
+        (errors, [property, rules]) => ({
+          ...errors,
+          [property]: rules
+            .map(rule => rule(mergedValues[property], mergedValues))
+            .filter(Boolean),
+        }),
+        errors
+      );
+
+      return {
+        values: mergedValues,
+        errors: mergedErrors,
+      };
+    });
+  };
 
   render() {
     const {children, render, ...props} = this.props;
     const {values, errors} = this.state;
 
     return (
-      <Provider value={{values, errors, setContext: this.setState.bind(this)}}>
-        <form {...props} onSubmit={this.onSubmit}>
+      <Provider value={{values, errors, setValues: this.handleSetValues}}>
+        <form {...props} onSubmit={this.handleSubmit}>
           {render
             ? render({
                 values,
-                errors: mapErrors(errors),
-                setValues: this.setValues,
+                errors,
+                setValues: this.handleSetValues,
               })
             : children}
         </form>
@@ -54,79 +76,22 @@ class Form extends Component {
   }
 }
 
-class FormItem extends Component {
-  static defaultProps = {
-    rules: [],
-    validate: ["change"],
-  };
+const FormItem = ({
+  contextProps: {values, errors, setValues},
+  name,
+  children,
+}) =>
+  React.cloneElement(children, {
+    value: values[name],
+    error: (errors[name] || [])[0],
+    errors: errors[name] || [],
+    onChange: e => {
+      setValues({[name]: e.target ? e.target.value : e});
 
-  componentDidMount() {
-    const {
-      contextProps: {values},
-      validate,
-      name,
-    } = this.props;
-
-    if (validate.includes("mount")) {
-      this.validate(values[name], values);
-    }
-  }
-
-  validate = (value, values) => {
-    const {
-      contextProps: {setContext},
-      rules,
-      name,
-    } = this.props;
-
-    setContext(({errors}) => ({
-      errors: {
-        ...errors,
-        [name]: rules.map(rule => rule(value, values)).filter(Boolean),
-      },
-    }));
-  };
-
-  update = value => {
-    const {
-      contextProps: {setContext},
-      name,
-    } = this.props;
-
-    setContext(({values}) => ({
-      values: {
-        ...values,
-        [name]: value,
-      },
-    }));
-  };
-
-  render() {
-    const {
-      contextProps: {values, errors},
-      name,
-      children,
-      validate,
-    } = this.props;
-
-    return React.cloneElement(children, {
-      value: values[name],
-      error: (errors[name] || [])[0],
-      errors: errors[name] || [],
-      onFocus: () =>
-        validate.includes("focus") && this.validate(values[name], values),
-      onChange: e => {
-        const value = e.target ? e.target.value : e;
-
-        this.update(value);
-        validate.includes("change") && this.validate(value, values);
-
-        e.persist();
-      },
-      ...children.props,
-    });
-  }
-}
+      e.persist();
+    },
+    ...children.props,
+  });
 
 export default {
   Form,
