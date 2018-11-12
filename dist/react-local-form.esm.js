@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import assoc from 'lodash.set';
+import path from 'lodash.get';
 
 function _classCallCheck(instance, Constructor) {
   if (!(instance instanceof Constructor)) {
@@ -293,12 +295,6 @@ function (_Component) {
       }), render ? render({
         values: values,
         errors: errors,
-        submit: function submit() {
-          return {
-            values: values,
-            errors: errors
-          };
-        },
         setValues: this.handleSetValues
       }) : children));
     }
@@ -320,11 +316,11 @@ var FormItem = function FormItem(_ref4) {
       name = _ref4.name,
       children = _ref4.children;
   return React.cloneElement(children, _objectSpread({
-    value: values[name],
+    value: path(values, name),
     error: (errors[name] || [])[0],
     errors: errors[name] || [],
     onChange: function onChange(e) {
-      setValues(_defineProperty({}, name, e.target ? e.target.value : e));
+      setValues(assoc(values, name, e.target ? e.target.value : e));
       e.persist();
     }
   }, children.props));

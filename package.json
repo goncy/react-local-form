@@ -27,6 +27,8 @@
   "author": "goncy",
   "license": "MIT",
   "dependencies": {
+    "lodash.get": "^4.4.2",
+    "lodash.set": "^4.3.2",
     "react": "^16.4.0",
     "react-dom": "^16.4.0"
   },

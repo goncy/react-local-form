@@ -1,4 +1,6 @@
 import React, {Component} from "react";
+import assoc from "lodash.set";
+import path from "lodash.get";
 
 const {Provider, Consumer} = React.createContext({});
 
@@ -67,7 +69,6 @@ class Form extends Component {
             ? render({
                 values,
                 errors,
-                submit: () => ({values, errors}),
                 setValues: this.handleSetValues,
               })
             : children}
@@ -83,11 +84,11 @@ const FormItem = ({
   children,
 }) =>
   React.cloneElement(children, {
-    value: values[name],
+    value: path(values, name),
     error: (errors[name] || [])[0],
     errors: errors[name] || [],
     onChange: e => {
-      setValues({[name]: e.target ? e.target.value : e});
+      setValues(assoc(values, name, e.target ? e.target.value : e));
 
       e.persist();
     },
