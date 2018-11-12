@@ -298,7 +298,12 @@ function (_Component) {
       }), render ? render({
         values: values,
         errors: errors,
-        submit: this.handleSubmit,
+        submit: function submit() {
+          return {
+            values: values,
+            errors: errors
+          };
+        },
         setValues: this.handleSetValues
       }) : children));
     }
