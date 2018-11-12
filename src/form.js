@@ -67,6 +67,7 @@ class Form extends Component {
             ? render({
                 values,
                 errors,
+                submit: this.handleSubmit,
                 setValues: this.handleSetValues,
               })
             : children}

@@ -293,6 +293,7 @@ function (_Component) {
       }), render ? render({
         values: values,
         errors: errors,
+        submit: this.handleSubmit,
         setValues: this.handleSetValues
       }) : children));
     }
