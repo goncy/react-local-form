@@ -44,8 +44,8 @@ class Form extends Component {
       const mergedErrors = Object.entries(rules).reduce(
         (errors, [property, rules]) => ({
           ...errors,
-          [property]: rules
-            .map(rule => rule(mergedValues[property], mergedValues))
+          [property]: (Array.isArray(rules) ? rules : [rules])
+            .map(rule => rule(path(mergedValues, property), mergedValues))
             .filter(Boolean),
         }),
         errors

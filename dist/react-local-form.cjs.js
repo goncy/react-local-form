@@ -260,8 +260,8 @@ function (_Component) {
               property = _ref3[0],
               rules = _ref3[1];
 
-          return _objectSpread({}, errors, _defineProperty({}, property, rules.map(function (rule) {
-            return rule(mergedValues[property], mergedValues);
+          return _objectSpread({}, errors, _defineProperty({}, property, (Array.isArray(rules) ? rules : [rules]).map(function (rule) {
+            return rule(path(mergedValues, property), mergedValues);
           }).filter(Boolean)));
         }, errors);
         return {
