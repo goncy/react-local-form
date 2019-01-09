@@ -28,11 +28,11 @@ const App = () => {
       // Set rules
       rules={{
         first: isRequired,
-        last: [isRequired, (value, values) => !value.first && "You need a first to have a last"]
+        last: [isRequired, (value, values) => !values.first && "You need a first to have a last"]
       }}
       // Log the results when there aren't form errors
       onSubmit={({values, errors}) => {
-        const error = Object.values(errors)[0];
+        const error = Object.values(errors).flat()[0];
 
         error ? toaster.danger(error) : console.log(values)
       }}
