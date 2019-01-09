@@ -17,24 +17,30 @@ Easy form handling for most basic (and common) cases
 import React from "react";
 import {Form, FormItem} from "react-local-form";
 
+// You can move validations to another file
+const isRequired = value => !value && "This field is required";
+
 const App = () => {
   return (
     <Form
       // Initial values
       values={{first: "Gonzalo", last: "Pozzo"}}
+      // Set rules
+      rules={{
+        first: isRequired,
+        last: [isRequired, (value, values) => !value.first && "You need a first to have a last"]
+      }}
       // Log the results when there aren't form errors
-      onSubmit={({values, errors: [error]}) =>
+      onSubmit={({values, errors}) => {
+        const error = Object.values(errors)[0];
+
         error ? toaster.danger(error) : console.log(values)
-      }
+      }}
       // You also can pass children instead of render if you don't need the errors
       render={({errors}) => (
         <FormItem
           // Name of the field to map
           name="first"
-          // Array of rules that should pass so the form can submit
-          rules={[value => !value && "This field can't be empty"]}
-          // Value will be validated since mount
-          validate={["mount", "focus", "change"]}
         >
           <input type="text" /> {/* An error, value and onChange prop will automatically be passed to this component */}
         </FormItem>
